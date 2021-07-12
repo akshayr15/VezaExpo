@@ -52,7 +52,7 @@ export default function SignupScreen({ navigation }) {
     setLoading(true);
     if (!email || !password || !image || !name) {
       alert("please add all the field");
-      navigation.navigate()("Signup");
+      navigation.navigate("Signup");
       return;
     }
     try {
@@ -68,6 +68,7 @@ export default function SignupScreen({ navigation }) {
       });
       alert("User Signup success");
       setLoading(false);
+      navigation.navigate("Home");
     } catch (err) {
       alert(err);
     }
