@@ -15,23 +15,9 @@ import firebase from "firebase";
 import { TextInput, Button } from "react-native-paper";
 export default function LoginScreen({ user, route, navigation }) {
   const [messages, setMessages] = useState([]);
+  const [textstatus, setTextStatus] = useState(false);
   const { uid } = route.params;
   const getAllMessages = async () => {
-    /* const docid = uid > user.uid ? user.uid + "-" + uid : uid + "-" + user.uid;
-    const querySnap = await firebase
-      .firestore()
-      .collection("chatrooms ")
-      .doc(docid)
-      .collection("messages")
-      .orderBy("createdAt", "desc")
-      .get();
-    const allmsg = querySnap.docs.map((docSnap) => {
-      return {
-        ...docSnap.data(),
-        createdAt: docSnap.data().createdAt.toDate(),
-      };
-    });
-    setMessages(allmsg); */
     const docid = uid > user.uid ? user.uid + "-" + uid : uid + "-" + user.uid;
     const messageRef = firebase
       .firestore()
@@ -62,8 +48,22 @@ export default function LoginScreen({ user, route, navigation }) {
       unSubscribe();
     };
   };
+  const statusUpdate = () => {
+    const docid = uid > user.uid ? user.uid + "-" + uid : uid + "-" + user.uid;
+    setTextStatus(true);
+    console.log("=====statusupadte");
+    firebase
+      .firestore()
+      .collection("chatrooms")
+      .doc(docid)
+      .collection("messages")
+      .update({
+        read: true,
+      });
+  };
   useEffect(() => {
     getAllMessages();
+    //statusUpdate();
   }, []);
   const onSend = (messageArray = []) => {
     const msg = messageArray[0];
@@ -78,6 +78,7 @@ export default function LoginScreen({ user, route, navigation }) {
       GiftedChat.append(previousMessages, mymsg)
     );
     const docid = uid > user.uid ? user.uid + "-" + uid : uid + "-" + user.uid;
+    console.log(uid, "==============uid====", user.uid);
     firebase
       .firestore()
       .collection("chatrooms")
@@ -86,6 +87,7 @@ export default function LoginScreen({ user, route, navigation }) {
       .add({
         ...mymsg,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        read: false,
       });
   };
 

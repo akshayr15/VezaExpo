@@ -25,7 +25,7 @@ import * as ImagePicker from "expo-image-picker";
 export default function SignupScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [file, setFile] = useState("");
+  const [results, setResults] = useState("");
   const [password, setPassword] = useState("");
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -42,52 +42,18 @@ export default function SignupScreen({ navigation }) {
     }
     getresponse();
   }, []);
-  if (loading) {
+  /* if (loading) {
     return <ActivityIndicator size="large" color="red" />;
-  }
+  } */
   const min = 1;
   const max = 100;
   const rand = min + Math.random() * (max - min);
+
   const userSignup = async () => {
-    setLoading(true);
-    if (!email || !password || !image || !name) {
-      alert("please add all the field");
-      navigation.navigate("Signup");
-      return;
-    }
-    try {
-      const result = await firebase
-        .auth()
-        .createUserWithEmailAndPassword(email, password);
-      firebase.firestore().collection("users").doc(result.user.uid).set({
-        name: name,
-        email: result.user.email,
-        uid: result.user.uid,
-        pic: image,
-        status: "online",
-      });
-      alert("User Signup success");
-      setLoading(false);
-      navigation.navigate("Home");
-    } catch (err) {
-      alert(err);
-    }
-  };
-  const pickImageAndUpload = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [7, 6],
-      quality: 1,
-    });
-    console.log(result);
-    alert("Image Uploaded Successfully");
-    if (!result.cancelled) {
-      console.log("Failed");
-    }
+    //setLoading(true);
     (async () => {
       // console.log(abcd, '==== file');
-      const response = await fetch(result.uri);
+      const response = await fetch(results.uri);
       // console.log(response, '==== response');
       const blob = await response.blob();
       var ref = firebase.storage().ref(`/userprofile/${rand}`).put(blob);
@@ -108,7 +74,34 @@ export default function SignupScreen({ navigation }) {
               .getDownloadURL()
               .then((url) => {
                 console.log(url, "=====url");
-                setImage(url);
+                (async () => {
+                  if (!email || !password || !url || !name) {
+                    alert("please add all the field");
+                    navigation.navigate("Signup");
+                    return;
+                  }
+                  try {
+                    const result = await firebase
+                      .auth()
+                      .createUserWithEmailAndPassword(email, password);
+                    firebase
+                      .firestore()
+                      .collection("users")
+                      .doc(result.user.uid)
+                      .set({
+                        name: name,
+                        email: result.user.email,
+                        uid: result.user.uid,
+                        pic: url,
+                        status: "online",
+                      });
+                    alert("User Signup success");
+                    setLoading(false);
+                    navigation.navigate("Home");
+                  } catch (err) {
+                    alert(err);
+                  }
+                })();
               });
           }
         },
@@ -117,6 +110,19 @@ export default function SignupScreen({ navigation }) {
         }
       );
     })();
+  };
+  const pickImageAndUpload = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [7, 6],
+      quality: 1,
+    });
+    setResults(result);
+    console.log("Image Uploaded Successfully");
+    if (!result.cancelled) {
+      console.log("Failed");
+    }
   };
   return (
     <KeyboardAvoidingView behavior="position">
@@ -169,7 +175,7 @@ export default function SignupScreen({ navigation }) {
               <Button
                 style={styles.button}
                 mode="contained"
-                disabled={image ? false : true}
+                disabled={results ? false : true}
                 onPress={() => {
                   userSignup();
                 }}

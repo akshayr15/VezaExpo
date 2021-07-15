@@ -9,6 +9,9 @@ import HomeScreen from "./src/screens/HomeScreen";
 import ChatScreen from "./src/screens/ChatScreen";
 import firebase from "./firebase/fire";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { LogBox } from "react-native";
+LogBox.ignoreLogs(["Warning: ..."]); // Ignore log notification by message
+LogBox.ignoreAllLogs();
 //import auth from "@react-native-firebase/auth";
 import { DefaultTheme, Provider as PaperProvider } from "react-native-paper";
 
